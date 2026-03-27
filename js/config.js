@@ -16,7 +16,7 @@ export const PLAYER_STEP_INTERVAL = 0.2;
 
 // --- Autos ---
 export const NUM_CAR_SPRITES = 6;
-export const CARS_PER_LANE = 4;
+export const CARS_PER_LANE = 2;
 export const CAR_HEIGHT_FACTOR = 0.85;
 export const CAR_SIZE_SCALE = 0.75;
 export const CAR_ASPECT_RATIO = 2.2;
