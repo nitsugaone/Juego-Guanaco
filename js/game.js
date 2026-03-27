@@ -284,6 +284,8 @@ export class Game {
                 this.state = "WINLEVEL";
             }
         }
+
+        this.updateUI();
     }
 
     drawImgCenter(ctx, imgKey, x, y, w, h, hue = 0, wobble = 0, flipX = 1) {
