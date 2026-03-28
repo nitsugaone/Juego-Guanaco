@@ -3,11 +3,12 @@
 // ==========================================
 
 import {
-    GAME_WIDTH, GAME_HEIGHT, SCALES, LEVEL_LAYOUTS,
+    GAME_WIDTH, GAME_HEIGHT, WORLD_HEIGHT_SCALE, SCALES, LEVEL_LAYOUTS,
     BASE_PLAYER_SPEED, SPEED_PER_TIER, PLAYER_SIZE_SCALE,
     PLAYER_VIS_WIDTH_FACTOR, PLAYER_VIS_HEIGHT_FACTOR, PLAYER_STEP_INTERVAL,
     NUM_CAR_SPRITES, CARS_PER_LANE, CAR_HEIGHT_FACTOR, CAR_SIZE_SCALE,
     CAR_ASPECT_RATIO, BASE_CAR_SPEED, CAR_SPEED_PER_TIER, CAR_BOUNCE_SPEED,
+    CAR2_SIZE_MULTIPLIER,
     HOUSE_VIS_SCALE, POLE_WIDTH, POLE_HEIGHT, POLE_VIS_WIDTH_FACTOR,
     POLE_VIS_HEIGHT_FACTOR, POLE_POSITIONS, POLE_RANDOM_OFFSET,
     FREEZE_DURATION, SHAKE_DURATION, SHAKE_MAGNITUDE,
@@ -76,12 +77,14 @@ export class Game {
         this.poles = [];
         this.cableNodes = [];
         this.levelTime = 0;
+        this.cameraY = 0;
 
         const layoutIdx = Math.min(levelIndex, MAX_LEVELS);
         const layout = LEVEL_LAYOUTS[layoutIdx];
 
         const totalLanes = layout.reduce((sum, strip) => sum + strip.lanes, 0);
-        const laneHeight = GAME_HEIGHT / totalLanes;
+        this.worldHeight = GAME_HEIGHT * WORLD_HEIGHT_SCALE;
+        const laneHeight = this.worldHeight / totalLanes;
 
         this.player = new Entity(
             GAME_WIDTH / 2, 0,
@@ -109,7 +112,7 @@ export class Game {
 
             if (isBottom) {
                 this.player.y = currentY + stripHeight - (laneHeight / 2);
-                this.cableNodes.push({ x: this.player.x, y: GAME_HEIGHT });
+                this.cableNodes.push({ x: this.player.x, y: this.worldHeight });
             } else if (isTop) {
                 this.house = new Entity(
                     GAME_WIDTH / 2,
@@ -130,14 +133,19 @@ export class Game {
                     const laneOffset = Math.random() * spacing;
 
                     for (let c = 0; c < CARS_PER_LANE; c++) {
-                        const carVisH = (laneHeight * CAR_HEIGHT_FACTOR) * CAR_SIZE_SCALE;
-                        const carVisW = carVisH * CAR_ASPECT_RATIO;
+                        let carVisH = (laneHeight * CAR_HEIGHT_FACTOR) * CAR_SIZE_SCALE;
+                        let carVisW = carVisH * CAR_ASPECT_RATIO;
+                        const carImgKey = 'car' + (Math.floor(Math.random() * NUM_CAR_SPRITES) + 1);
+                        if (carImgKey === 'car2') {
+                            carVisW *= CAR2_SIZE_MULTIPLIER;
+                            carVisH *= CAR2_SIZE_MULTIPLIER;
+                        }
                         const startX = laneOffset + (c * spacing);
                         const car = new Entity(startX, laneCenterY, carVisW, carVisH);
                         car.w = car.visW * SCALES.CAR_W;
                         car.h = car.visH * SCALES.CAR_H;
                         car.speed = baseSpeed;
-                        car.img = 'car' + (Math.floor(Math.random() * NUM_CAR_SPRITES) + 1);
+                        car.img = carImgKey;
                         car.hue = Math.random() * 360;
                         this.cars.push(car);
                     }
@@ -230,7 +238,11 @@ export class Game {
         if (this.player.x < this.player.w / 2) this.player.x = this.player.w / 2;
         if (this.player.x > GAME_WIDTH - this.player.w / 2) this.player.x = GAME_WIDTH - this.player.w / 2;
         if (this.player.y < this.player.h / 2) this.player.y = this.player.h / 2;
-        if (this.player.y > GAME_HEIGHT - this.player.h / 2) this.player.y = GAME_HEIGHT - this.player.h / 2;
+        if (this.player.y > this.worldHeight - this.player.h / 2) this.player.y = this.worldHeight - this.player.h / 2;
+
+        // Cámara sigue al jugador
+        this.cameraY = this.player.y - GAME_HEIGHT / 2;
+        this.cameraY = Math.max(0, Math.min(this.cameraY, this.worldHeight - GAME_HEIGHT));
 
         this.particles.update(dt);
         this.floatingTexts.update(dt);
@@ -328,6 +340,7 @@ export class Game {
             const mag = (this.shakeTime / SHAKE_DURATION) * SHAKE_MAGNITUDE;
             ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag);
         }
+        ctx.translate(0, -this.cameraY);
 
         for (const s of this.strips) {
             if (s.isRoad) {

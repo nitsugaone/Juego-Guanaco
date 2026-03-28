@@ -6,10 +6,13 @@
 export const GAME_WIDTH = 600;
 export const GAME_HEIGHT = 800;
 
+// --- Mundo / Cámara ---
+export const WORLD_HEIGHT_SCALE = 1.6;
+
 // --- Jugador ---
-export const BASE_PLAYER_SPEED = 300;
-export const SPEED_PER_TIER = 10;
-export const PLAYER_SIZE_SCALE = 4.5;
+export const BASE_PLAYER_SPEED = 450;
+export const SPEED_PER_TIER = 15;
+export const PLAYER_SIZE_SCALE = 2.8;
 export const PLAYER_VIS_WIDTH_FACTOR = 0.7;
 export const PLAYER_VIS_HEIGHT_FACTOR = 0.9;
 export const PLAYER_STEP_INTERVAL = 0.2;
@@ -23,6 +26,7 @@ export const CAR_ASPECT_RATIO = 2.2;
 export const BASE_CAR_SPEED = 80;
 export const CAR_SPEED_PER_TIER = 15;
 export const CAR_BOUNCE_SPEED = 15;
+export const CAR2_SIZE_MULTIPLIER = 1.5;
 
 // --- Escalas de colisión ---
 export const SCALES = {
@@ -40,10 +44,10 @@ export const SCALES = {
 export const HOUSE_VIS_SCALE = 0.9;
 
 // --- Postes ---
-export const POLE_WIDTH = 20;
-export const POLE_HEIGHT = 30;
-export const POLE_VIS_WIDTH_FACTOR = 0.5;
-export const POLE_VIS_HEIGHT_FACTOR = 1.2;
+export const POLE_WIDTH = 35;
+export const POLE_HEIGHT = 50;
+export const POLE_VIS_WIDTH_FACTOR = 0.8;
+export const POLE_VIS_HEIGHT_FACTOR = 1.8;
 export const POLE_POSITIONS = [0.25, 0.75];
 export const POLE_RANDOM_OFFSET = 40;
 
@@ -59,8 +63,8 @@ export const STEP_PARTICLE_COUNT = 2;
 export const STEP_PARTICLE_SPEED = 0.2;
 
 // --- Estrellas de nivel ---
-export const STAR_TIME_3 = 15;
-export const STAR_TIME_2 = 25;
+export const STAR_TIME_3 = 20;
+export const STAR_TIME_2 = 35;
 
 // --- Timing ---
 export const MAX_DT = 0.1;
