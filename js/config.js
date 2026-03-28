@@ -9,7 +9,7 @@ export const GAME_HEIGHT = 800;
 // --- Jugador ---
 export const BASE_PLAYER_SPEED = 300;
 export const SPEED_PER_TIER = 10;
-export const PLAYER_SIZE_SCALE = 0.75;
+export const PLAYER_SIZE_SCALE = 2.25;
 export const PLAYER_VIS_WIDTH_FACTOR = 0.7;
 export const PLAYER_VIS_HEIGHT_FACTOR = 0.9;
 export const PLAYER_STEP_INTERVAL = 0.2;
