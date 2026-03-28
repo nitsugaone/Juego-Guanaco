@@ -77,23 +77,21 @@ export const CABLE_SHADOW_BLUR = 10;
 export const CABLE_COLOR = '#e67e22';
 export const CABLE_SHADOW_COLOR = '#f39c12';
 
-// --- Rutas de imágenes ---
-// Usar URLs remotas hasta que los assets locales estén disponibles.
-// Cuando tengas las imágenes en ./assets/, cambiá a rutas locales.
+// --- Rutas de imágenes (locales) ---
 export const IMAGE_URLS = {
-    cesped: 'https://i.imgur.com/Gv2Oonn.jpeg',
-    poste: 'https://i.imgur.com/tTb5gF0.png',
-    casa: 'https://i.imgur.com/RnJgsYj.png',
-    car1: 'https://i.imgur.com/96kMW1F.png',
-    car2: 'https://i.imgur.com/jKJcfh2.png',
-    car3: 'https://i.imgur.com/3UzNmve.png',
-    car4: 'https://i.imgur.com/AoMHEYe.png',
-    car5: 'https://i.imgur.com/R2u46eF.png',
-    car6: 'https://i.imgur.com/DFYNede.png',
-    up: 'https://i.imgur.com/ZeqL32w.png',
-    down: 'https://i.imgur.com/X9YQ983.png',
-    left: 'https://i.imgur.com/ZD08VD0.png',
-    right: 'https://i.imgur.com/hNaeB4b.png',
+    cesped: './assets/cesped.jpg',
+    poste: './assets/poste.png',
+    casa: './assets/casa.png',
+    car1: './assets/car1.png',
+    car2: './assets/car2.png',
+    car3: './assets/car3.png',
+    car4: './assets/car4.png',
+    car5: './assets/car5.png',
+    car6: './assets/car6.png',
+    up: './assets/guanaco_up.png',
+    down: './assets/guanaco_down.png',
+    left: './assets/guanaco_left.png',
+    right: './assets/guanaco_right.png',
 };
 
 // --- Frases y mensajes ---
