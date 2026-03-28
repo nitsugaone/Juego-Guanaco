@@ -12,7 +12,7 @@ export const WORLD_HEIGHT_SCALE = 1.6;
 // --- Jugador ---
 export const BASE_PLAYER_SPEED = 450;
 export const SPEED_PER_TIER = 15;
-export const PLAYER_SIZE_SCALE = 2.8;
+export const PLAYER_SIZE_SCALE = 1.4;
 export const PLAYER_VIS_WIDTH_FACTOR = 0.7;
 export const PLAYER_VIS_HEIGHT_FACTOR = 0.9;
 export const PLAYER_STEP_INTERVAL = 0.2;
