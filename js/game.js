@@ -129,7 +129,9 @@ export class Game {
                     const laneCenterY = currentY + (l + 0.5) * laneHeight;
                     const direction = (l % 2 === 0) ? 1 : -1;
                     const baseSpeed = (BASE_CAR_SPEED + diffTier * CAR_SPEED_PER_TIER) * direction;
-                    const spacing = GAME_WIDTH / CARS_PER_LANE;
+                    const maxCarW = (laneHeight * CAR_HEIGHT_FACTOR) * CAR_SIZE_SCALE * CAR_ASPECT_RATIO * CAR2_SIZE_MULTIPLIER;
+                    const minSpacing = maxCarW * 1.5;
+                    const spacing = Math.max(GAME_WIDTH / CARS_PER_LANE, minSpacing);
                     const laneOffset = Math.random() * spacing;
 
                     for (let c = 0; c < CARS_PER_LANE; c++) {
