@@ -401,7 +401,7 @@ export class Game {
 
         for (const c of this.cars) {
             const bounce = Math.abs(Math.sin(this.timeElapsed * CAR_BOUNCE_SPEED + c.x)) * 3;
-            const flipX = c.speed > 0 ? -1 : 1;
+            const flipX = c.speed < 0 ? -1 : 1;
             this.drawImgCenter(ctx, c.img, c.x, c.y - bounce, c.visW, c.visH, c.hue, 0, flipX);
         }
 
