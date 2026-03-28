@@ -26,10 +26,10 @@ export const CAR_BOUNCE_SPEED = 15;
 
 // --- Escalas de colisión ---
 export const SCALES = {
-    PLAYER_W_V: 0.15,
-    PLAYER_H_V: 0.15,
-    PLAYER_W_H: 0.2,
-    PLAYER_H_H: 0.1,
+    PLAYER_W_V: 0.08,
+    PLAYER_H_V: 0.08,
+    PLAYER_W_H: 0.1,
+    PLAYER_H_H: 0.05,
     CAR_W: 0.9,
     CAR_H: 0.4,
     CASA_W: 0.7,
