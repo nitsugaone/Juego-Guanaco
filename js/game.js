@@ -116,7 +116,7 @@ export class Game {
             } else if (isTop) {
                 this.house = new Entity(
                     GAME_WIDTH / 2,
-                    currentY + stripHeight / 2,
+                    currentY + stripHeight * 0.35,
                     stripHeight * HOUSE_VIS_SCALE,
                     stripHeight * HOUSE_VIS_SCALE
                 );

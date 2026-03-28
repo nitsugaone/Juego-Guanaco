@@ -21,12 +21,12 @@ export const PLAYER_STEP_INTERVAL = 0.2;
 export const NUM_CAR_SPRITES = 6;
 export const CARS_PER_LANE = 2;
 export const CAR_HEIGHT_FACTOR = 0.85;
-export const CAR_SIZE_SCALE = 0.75;
+export const CAR_SIZE_SCALE = 0.9375;
 export const CAR_ASPECT_RATIO = 2.2;
 export const BASE_CAR_SPEED = 80;
 export const CAR_SPEED_PER_TIER = 15;
 export const CAR_BOUNCE_SPEED = 15;
-export const CAR2_SIZE_MULTIPLIER = 1.5;
+export const CAR2_SIZE_MULTIPLIER = 1.6;
 
 // --- Escalas de colisión ---
 export const SCALES = {
@@ -41,7 +41,7 @@ export const SCALES = {
 };
 
 // --- Casa ---
-export const HOUSE_VIS_SCALE = 0.9;
+export const HOUSE_VIS_SCALE = 1.53;
 
 // --- Postes ---
 export const POLE_WIDTH = 35;
