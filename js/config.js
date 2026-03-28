@@ -9,7 +9,7 @@ export const GAME_HEIGHT = 800;
 // --- Jugador ---
 export const BASE_PLAYER_SPEED = 300;
 export const SPEED_PER_TIER = 10;
-export const PLAYER_SIZE_SCALE = 2.25;
+export const PLAYER_SIZE_SCALE = 4.5;
 export const PLAYER_VIS_WIDTH_FACTOR = 0.7;
 export const PLAYER_VIS_HEIGHT_FACTOR = 0.9;
 export const PLAYER_STEP_INTERVAL = 0.2;
@@ -26,10 +26,10 @@ export const CAR_BOUNCE_SPEED = 15;
 
 // --- Escalas de colisión ---
 export const SCALES = {
-    PLAYER_W_V: 0.4,
-    PLAYER_H_V: 0.4,
-    PLAYER_W_H: 0.6,
-    PLAYER_H_H: 0.3,
+    PLAYER_W_V: 0.15,
+    PLAYER_H_V: 0.15,
+    PLAYER_W_H: 0.2,
+    PLAYER_H_H: 0.1,
     CAR_W: 0.9,
     CAR_H: 0.4,
     CASA_W: 0.7,
@@ -77,23 +77,21 @@ export const CABLE_SHADOW_BLUR = 10;
 export const CABLE_COLOR = '#e67e22';
 export const CABLE_SHADOW_COLOR = '#f39c12';
 
-// --- Rutas de imágenes ---
-// Usar URLs remotas hasta que los assets locales estén disponibles.
-// Cuando tengas las imágenes en ./assets/, cambiá a rutas locales.
+// --- Rutas de imágenes (locales) ---
 export const IMAGE_URLS = {
-    cesped: 'https://i.imgur.com/Gv2Oonn.jpeg',
-    poste: 'https://i.imgur.com/tTb5gF0.png',
-    casa: 'https://i.imgur.com/RnJgsYj.png',
-    car1: 'https://i.imgur.com/96kMW1F.png',
-    car2: 'https://i.imgur.com/jKJcfh2.png',
-    car3: 'https://i.imgur.com/3UzNmve.png',
-    car4: 'https://i.imgur.com/AoMHEYe.png',
-    car5: 'https://i.imgur.com/R2u46eF.png',
-    car6: 'https://i.imgur.com/DFYNede.png',
-    up: 'https://i.imgur.com/ZeqL32w.png',
-    down: 'https://i.imgur.com/X9YQ983.png',
-    left: 'https://i.imgur.com/ZD08VD0.png',
-    right: 'https://i.imgur.com/hNaeB4b.png',
+    cesped: './assets/cesped.jpg',
+    poste: './assets/poste.png',
+    casa: './assets/casa.png',
+    car1: './assets/car1.png',
+    car2: './assets/car2.png',
+    car3: './assets/car3.png',
+    car4: './assets/car4.png',
+    car5: './assets/car5.png',
+    car6: './assets/car6.png',
+    up: './assets/guanaco_up.png',
+    down: './assets/guanaco_down.png',
+    left: './assets/guanaco_left.png',
+    right: './assets/guanaco_right.png',
 };
 
 // --- Frases y mensajes ---
