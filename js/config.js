@@ -9,7 +9,7 @@ export const GAME_HEIGHT = 800;
 // --- Jugador ---
 export const BASE_PLAYER_SPEED = 300;
 export const SPEED_PER_TIER = 10;
-export const PLAYER_SIZE_SCALE = 2.25;
+export const PLAYER_SIZE_SCALE = 4.5;
 export const PLAYER_VIS_WIDTH_FACTOR = 0.7;
 export const PLAYER_VIS_HEIGHT_FACTOR = 0.9;
 export const PLAYER_STEP_INTERVAL = 0.2;
@@ -26,10 +26,10 @@ export const CAR_BOUNCE_SPEED = 15;
 
 // --- Escalas de colisión ---
 export const SCALES = {
-    PLAYER_W_V: 0.4,
-    PLAYER_H_V: 0.4,
-    PLAYER_W_H: 0.6,
-    PLAYER_H_H: 0.3,
+    PLAYER_W_V: 0.15,
+    PLAYER_H_V: 0.15,
+    PLAYER_W_H: 0.2,
+    PLAYER_H_H: 0.1,
     CAR_W: 0.9,
     CAR_H: 0.4,
     CASA_W: 0.7,
