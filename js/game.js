@@ -428,16 +428,23 @@ export class Game {
     drawImgCenter(ctx, imgKey, x, y, w, h, wobble = 0, flipX = 1) {
         const img = this.ASSETS[imgKey];
         if (!img) return;
+        const flip = (flipX === -1);
 
-        // Sprite ya escalado (se genera una sola vez, ver sprites.js).
-        // Si todavía no cargó la imagen, se dibuja el original como respaldo.
-        const sprite = this.sprites ? this.sprites.get(img, imgKey, w, h) : null;
+        // Sprite ya escalado y, si corresponde, espejado (se genera una sola vez,
+        // ver sprites.js). El espejado se resuelve ahí para poder dejar derecho
+        // el texto de los carteles.
+        const sprite = this.sprites ? this.sprites.get(img, imgKey, w, h, flip) : null;
 
         ctx.save();
         ctx.translate(x, y);
         if (wobble !== 0) ctx.rotate(wobble);
-        if (flipX !== 1) ctx.scale(flipX, 1);
-        ctx.drawImage(sprite || img, -w / 2, -h / 2, w, h);
+        if (sprite) {
+            ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
+        } else {
+            // Respaldo mientras la imagen todavía no cargó
+            if (flip) ctx.scale(-1, 1);
+            ctx.drawImage(img, -w / 2, -h / 2, w, h);
+        }
         ctx.restore();
     }
 

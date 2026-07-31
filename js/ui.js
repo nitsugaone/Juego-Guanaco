@@ -8,7 +8,7 @@
 import {
     GAME_WIDTH, GAME_HEIGHT, MAX_DT, INITIAL_LIVES,
     IMAGE_URLS, EXCUSAS_GUANACO, DATO_P1, DATO_P2, DATO_P3,
-    MENSAJES_JEFE
+    MENSAJES_JEFE, SPRITE_TEXT_REGIONS
 } from './config.js';
 
 import { AudioSystem } from './audio.js';
@@ -29,7 +29,7 @@ const audio = new AudioSystem();
 
 // --- Cache de sprites ---
 // Pre-escala y colorea cada sprite una sola vez en vez de hacerlo por frame.
-const sprites = new SpriteCache(dpr);
+const sprites = new SpriteCache(dpr, SPRITE_TEXT_REGIONS);
 
 // --- Assets (imágenes cargadas) ---
 const ASSETS = {};           // Objeto clave→Image con todas las imágenes

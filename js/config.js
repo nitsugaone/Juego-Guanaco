@@ -52,6 +52,15 @@ export const SCALES = {
     CASA_H: 0.35       // Alto hitbox de la casa
 };
 
+// --- Zonas de texto en los sprites ---
+// Cuando un auto va hacia la derecha se espeja el sprite para que apunte al
+// lado correcto, pero eso deja el texto al revés. Estas zonas se vuelven a
+// espejar sobre el sprite ya dado vuelta, así el cartel se lee bien en ambas
+// direcciones. Coordenadas en fracciones del sprite SIN espejar (0 a 1).
+export const SPRITE_TEXT_REGIONS = {
+    car4: [{ x: 0.458, y: 0.424, w: 0.188, h: 0.082 }]  // cartel "TAXI" del techo
+};
+
 // --- Casa (objetivo final del nivel) ---
 export const HOUSE_VIS_SCALE = 1.53;  // Escala visual de la casa relativa al strip superior
 
