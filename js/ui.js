@@ -13,6 +13,7 @@ import {
 
 import { AudioSystem } from './audio.js';
 import { Game } from './game.js';
+import { SpriteCache } from './sprites.js';
 
 // --- Configuración del canvas ---
 // Se escala por devicePixelRatio para pantallas retina/HiDPI
@@ -25,6 +26,10 @@ ctx.scale(dpr, dpr);                           // Escalar para que las coordenad
 
 // --- Instanciar sistema de audio ---
 const audio = new AudioSystem();
+
+// --- Cache de sprites ---
+// Pre-escala y colorea cada sprite una sola vez en vez de hacerlo por frame.
+const sprites = new SpriteCache(dpr);
 
 // --- Assets (imágenes cargadas) ---
 const ASSETS = {};           // Objeto clave→Image con todas las imágenes
@@ -171,7 +176,7 @@ document.getElementById('generateExcuseBtn').addEventListener('click', () => {
 document.getElementById('startBtn').addEventListener('click', () => {
     audio.resume(); // Desbloquear audio tras interacción del usuario
     document.getElementById('aiFactText').style.display = 'none';
-    if (!game) game = new Game(audio, ASSETS, cespedPattern, setScreen);
+    if (!game) game = new Game(audio, ASSETS, cespedPattern, setScreen, sprites);
     game.level = 1;
     game.vidas = INITIAL_LIVES;
     game.timeElapsed = 0;
@@ -272,7 +277,7 @@ updateLeaderboard();   // Mostrar puntajes guardados
 loadAssets(() => {
     // Cuando todas las imágenes cargaron:
     setScreen('startScreen');  // Mostrar menú principal
-    game = new Game(audio, ASSETS, cespedPattern, setScreen);
+    game = new Game(audio, ASSETS, cespedPattern, setScreen, sprites);
     game.state = "MENU";
     lastTime = performance.now();
     requestAnimationFrame(gameLoop);  // Arrancar el game loop

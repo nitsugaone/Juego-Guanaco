@@ -32,12 +32,14 @@ export class Game {
      * @param {Object} assets - Imágenes cargadas (clave: nombre, valor: HTMLImageElement)
      * @param {CanvasPattern} cespedPattern - Patrón repetible de textura de césped
      * @param {Function} setScreenFn - Función para cambiar pantallas del UI
+     * @param {SpriteCache} sprites - Cache de sprites ya escalados y coloreados
      */
-    constructor(audio, assets, cespedPattern, setScreenFn) {
+    constructor(audio, assets, cespedPattern, setScreenFn, sprites) {
         this.audio = audio;
         this.ASSETS = assets;
         this.cespedPattern = cespedPattern;
         this.setScreen = setScreenFn;
+        this.sprites = sprites;
 
         // Estado del juego: LOADING, MENU, PLAYING, PAUSED, GAMEOVER, WINLEVEL, VICTORY
         this.state = "LOADING";
@@ -104,6 +106,10 @@ export class Game {
         this.cableNodes = [];   // Nodos del cable (puntos por donde pasa la fibra)
         this.levelTime = 0;     // Resetear tiempo del nivel
         this.cameraY = 0;       // Resetear posición de cámara
+
+        // Los tamaños de dibujo dependen del layout, así que los sprites
+        // cacheados del nivel anterior ya no sirven.
+        if (this.sprites) this.sprites.clear();
 
         // Seleccionar layout del nivel (clampeado al máximo)
         const layoutIdx = Math.min(levelIndex, MAX_LEVELS);
@@ -424,12 +430,16 @@ export class Game {
     drawImgCenter(ctx, imgKey, x, y, w, h, hue = 0, wobble = 0, flipX = 1) {
         const img = this.ASSETS[imgKey];
         if (!img) return;
+
+        // Sprite ya escalado y coloreado (se genera una sola vez, ver sprites.js).
+        // Si todavía no cargó la imagen, se dibuja el original como respaldo.
+        const sprite = this.sprites ? this.sprites.get(img, imgKey, w, h, hue) : null;
+
         ctx.save();
         ctx.translate(x, y);
         if (wobble !== 0) ctx.rotate(wobble);
         if (flipX !== 1) ctx.scale(flipX, 1);
-        if (hue !== 0) ctx.filter = `hue-rotate(${hue}deg)`;
-        ctx.drawImage(img, -w / 2, -h / 2, w, h);
+        ctx.drawImage(sprite || img, -w / 2, -h / 2, w, h);
         ctx.restore();
     }
 
@@ -458,7 +468,11 @@ export class Game {
      * Orden de capas: fondo → postes → casa → cable → autos → jugador → partículas.
      */
     draw(ctx) {
-        ctx.imageSmoothingEnabled = false; // Pixel art: sin suavizado
+        // Los sprites vienen del cache ya escalados a su tamaño físico exacto,
+        // así que acá se copian 1:1. El suavizado solo interpola las posiciones
+        // fraccionarias (autos en movimiento) y evita que vibren.
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
         // Flash rojo al ser golpeado (cubre toda la pantalla)
         if (this.flashRed) {
