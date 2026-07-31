@@ -170,12 +170,20 @@ export class Game {
                     // Calcular tamaño base del auto usando proporción natural de la imagen
                     const carBase = (laneHeight * CAR_HEIGHT_FACTOR) * CAR_SIZE_SCALE;
 
-                    // Separación mínima entre autos para evitar apilamiento visual
-                    // Se calcula con el auto más grande posible (car2 con multiplicador)
-                    const maxCarSize = carBase * CAR2_SIZE_MULTIPLIER * 2; // Estimación del ancho máximo
-                    const minSpacing = maxCarSize * CAR_SPACING_MULTIPLIER;
-                    const spacing = Math.max(GAME_WIDTH / CARS_PER_LANE, minSpacing);
-                    const laneOffset = Math.random() * spacing; // Offset aleatorio inicial
+                    // --- Pista virtual (evita que los autos se apilen) ---
+                    // Los autos circulan sobre una pista que puede ser MÁS ANCHA que la
+                    // pantalla. Los que quedan fuera de cámara esperan su turno y entran
+                    // de a uno. Sin esto, un auto colocado más allá del borde derecho se
+                    // teletransportaba al borde izquierdo en el primer frame y terminaba
+                    // encima de otro.
+                    const maxCarW = carBase * CAR2_SIZE_MULTIPLIER;      // Ancho del auto más grande (camión)
+                    const minSpacing = maxCarW * CAR_SPACING_MULTIPLIER; // Hueco mínimo deseado entre autos
+                    // La pista debe cubrir al menos la pantalla completa + un auto,
+                    // y ser lo bastante larga para que TODOS los autos tengan su hueco.
+                    const trackLen = Math.max(GAME_WIDTH + maxCarW, CARS_PER_LANE * minSpacing);
+                    const trackStart = -maxCarW / 2;         // Borde izquierdo de la pista (fuera de cámara)
+                    const spacing = trackLen / CARS_PER_LANE; // Separación real y uniforme
+                    const laneOffset = Math.random() * trackLen; // Desfase aleatorio del carril
 
                     for (let c = 0; c < CARS_PER_LANE; c++) {
                         // Seleccionar sprite aleatorio (car1..car6)
@@ -197,9 +205,13 @@ export class Game {
                             carVisH *= CAR2_SIZE_MULTIPLIER;
                         }
 
-                        // Posición X inicial con separación uniforme
-                        const startX = laneOffset + (c * spacing);
+                        // Posición X inicial: repartida uniformemente sobre la pista virtual
+                        const startX = trackStart + ((laneOffset + c * spacing) % trackLen);
                         const car = new Entity(startX, laneCenterY, carVisW, carVisH);
+
+                        // Guardar la pista para que update() sepa dónde reciclar el auto
+                        car.trackStart = trackStart;
+                        car.trackLen = trackLen;
 
                         // Hitbox del auto (más chico que el visual para colisiones justas)
                         car.w = car.visW * SCALES.CAR_W;
@@ -335,9 +347,10 @@ export class Game {
         // --- Mover autos y detectar colisión con jugador ---
         for (const c of this.cars) {
             c.x += c.speed * dt;
-            // Wrap horizontal: auto sale por un lado y reaparece por el otro
-            if (c.speed > 0 && c.x - c.visW / 2 > GAME_WIDTH) c.x = -c.visW / 2;
-            if (c.speed < 0 && c.x + c.visW / 2 < 0) c.x = GAME_WIDTH + c.visW / 2;
+            // Wrap sobre la pista virtual: al llegar al final reaparece al principio
+            // conservando la separación con los demás autos del carril.
+            if (c.x >= c.trackStart + c.trackLen) c.x -= c.trackLen;
+            else if (c.x < c.trackStart) c.x += c.trackLen;
             // Colisión jugador-auto
             if (this.player.checkCollision(c)) {
                 this.triggerHit();

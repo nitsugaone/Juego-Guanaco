@@ -28,13 +28,8 @@ assets/
   guanaco_*.png     -> Sprites del jugador (up/down/left/right)
 ```
 
-## Descargar assets
-
-Los sprites se alojan originalmente en imgur. Para descargarlos localmente:
-
-```bash
-bash download_assets.sh
-```
+Los sprites viven en `assets/` y se versionan con el repo. No hay descarga
+externa: el juego funciona offline una vez clonado.
 
 ## Ejecutar localmente
 

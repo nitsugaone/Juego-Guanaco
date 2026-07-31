@@ -31,7 +31,11 @@ export const BASE_CAR_SPEED = 80;              // Velocidad base de autos en px/
 export const CAR_SPEED_PER_TIER = 15;          // Aumento de velocidad por tier de dificultad
 export const CAR_BOUNCE_SPEED = 15;            // Frecuencia del rebote visual de los autos
 export const CAR2_SIZE_MULTIPLIER = 1.6;       // Multiplicador extra para car2 (camión) - se aplica parejo a ambos ejes
-export const CAR_SPACING_MULTIPLIER = 2.5;     // Multiplicador de separación mínima entre autos (evita apilamiento)
+// Separación mínima entre autos, medida en "anchos del auto más grande".
+// 1.5 = queda al menos medio auto de hueco entre uno y otro.
+// Si los autos no entran en el ancho de pantalla con esta separación,
+// la pista virtual se alarga fuera de cámara (ver trackLen en game.js).
+export const CAR_SPACING_MULTIPLIER = 1.5;
 
 // --- Escalas de colisión (hitbox) ---
 // Cada valor es una fracción del tamaño VISUAL de la entidad.
