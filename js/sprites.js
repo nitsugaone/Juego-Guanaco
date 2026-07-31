@@ -12,6 +12,68 @@
 // filtrado de calidad, que es lo que da un resultado estable.
 // ==========================================
 
+// Cache de las mediciones de contenido, para no volver a leer pixeles.
+const contentBoxes = new Map();
+
+/**
+ * Mide que parte del PNG ocupa realmente el dibujo, ignorando el borde
+ * transparente. Los sprites de autos son cuadrados de 500x500 pero el vehiculo
+ * ocupa solo una franja: el camion apenas el 18% del alto y la ambulancia el
+ * 57%. Sin esto, un unico porcentaje fijo de hitbox sirve para unos y falla
+ * para otros.
+ *
+ * @param {HTMLImageElement} img - Imagen ya cargada
+ * @param {string} key - Clave del asset (para cachear la medicion)
+ * @returns {{cx:number, cy:number, w:number, h:number}|null} Fracciones de 0 a 1
+ *          (centro y tamaño del contenido), o null si no se pudieron leer los
+ *          pixeles (por ejemplo abriendo el juego con file://).
+ */
+export function measureContentBox(img, key) {
+    if (contentBoxes.has(key)) return contentBoxes.get(key);
+    if (!img || !img.naturalWidth) return null;
+
+    let box = null;
+    try {
+        // Se mide sobre una version reducida: alcanza para el hitbox y es rapido
+        const MAX = 128;
+        const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.max(1, Math.round(img.naturalWidth * scale));
+        const h = Math.max(1, Math.round(img.naturalHeight * scale));
+
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const cx = c.getContext('2d', { willReadFrequently: true });
+        cx.drawImage(img, 0, 0, w, h);
+        const data = cx.getImageData(0, 0, w, h).data;
+
+        let x0 = w, y0 = h, x1 = -1, y1 = -1;
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                if (data[(y * w + x) * 4 + 3] > 25) { // 25 = ignorar bordes casi transparentes
+                    if (x < x0) x0 = x;
+                    if (x > x1) x1 = x;
+                    if (y < y0) y0 = y;
+                    if (y > y1) y1 = y;
+                }
+            }
+        }
+        if (x1 >= x0 && y1 >= y0) {
+            box = {
+                cx: (x0 + x1 + 1) / 2 / w,
+                cy: (y0 + y1 + 1) / 2 / h,
+                w: (x1 - x0 + 1) / w,
+                h: (y1 - y0 + 1) / h
+            };
+        }
+    } catch (e) {
+        // Canvas contaminado (file://): se usara el hitbox fijo de respaldo
+        box = null;
+    }
+
+    contentBoxes.set(key, box);
+    return box;
+}
+
 export class SpriteCache {
     /**
      * @param {number} dpr - devicePixelRatio, para cachear a resolucion fisica

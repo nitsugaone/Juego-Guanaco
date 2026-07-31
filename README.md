@@ -18,6 +18,7 @@ js/
   config.js         -> Constantes, rutas de assets, frases y layouts
   audio.js          -> Sistema de audio (Web Audio API)
   entities.js       -> Clases Entity, ParticleSystem, FloatingTextSystem
+  sprites.js        -> Cache de sprites escalados y medicion de hitboxes
   game.js           -> Clase Game principal
   ui.js             -> Logica de UI, event listeners y game loop
 assets/
@@ -26,7 +27,11 @@ assets/
   casa.png          -> Sprite de la casa
   car1-6.png        -> Sprites de autos
   guanaco_*.png     -> Sprites del jugador (up/down/left/right)
+  fonts/            -> Tipografia Press Start 2P (alojada local)
 ```
+
+El juego no pide nada a servidores externos: sprites y tipografia viajan con
+el repo, asi que funciona sin conexion una vez cargado.
 
 Los sprites viven en `assets/` y se versionan con el repo. No hay descarga
 externa: el juego funciona offline una vez clonado.

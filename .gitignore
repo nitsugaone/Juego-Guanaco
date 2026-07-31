@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Temporales y pruebas
+tmp/
+*.tmp

@@ -5,7 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Guanaco Instalador 🦙</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        /* Fuente alojada en el propio repo. Antes se pedia a Google Fonts con
+           un @import, que bloquea el render hasta que responde y deja el juego
+           sin su tipografia si no hay internet. */
+        @font-face {
+            font-family: 'Press Start 2P';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;   /* muestra texto ya mismo con la fuente de respaldo */
+            src: url('./assets/fonts/press-start-2p-latin.woff2') format('woff2');
+        }
         * {
             box-sizing: border-box;
             user-select: none;
@@ -22,7 +31,7 @@
             align-items: center;
             height: 100vh;
             width: 100vw;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
             overflow: hidden;
         }
         #gameWrapper {
@@ -76,7 +85,7 @@
             width: 35px;
             height: 35px;
             cursor: pointer;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
             padding-top: 3px;
         }
         #gameCanvas {
@@ -124,7 +133,7 @@
             color: #2c3e50;
             border: 4px solid #bdc3c7;
             padding: 15px 20px;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
             font-size: 12px;
             cursor: pointer;
             margin-top: 10px;
@@ -243,15 +252,18 @@
             <button id="generateFactBtn" class="ai-btn" style="margin-bottom: 10px;">✨ Dato Guanaco ✨</button>
             <button id="startBtn">INICIAR JUEGO</button>
             <div id="leaderboard">
-                <h3>MEJORES TIEMPOS</h3>
+                <h3>MEJORES INTENTOS</h3>
                 <ol id="highScoresList"></ol>
             </div>
         </div>
         <div id="gameOverScreen" class="menu-screen">
             <h2 style="color: #e74c3c;">El técnico fue aplanado</h2>
+            <p id="gameOverStats" style="color: #2ecc71; margin-bottom: 10px;"></p>
             <p id="aiExcuseText" style="color: #f1c40f; font-style: italic; line-height: 1.6; display: none; padding: 0 15px;"></p>
             <button id="generateExcuseBtn" class="ai-btn" style="background: linear-gradient(45deg, #f39c12, #d35400) !important;">📝 Generar Excusa 📝</button>
             <button id="restartBtn">INTENTAR DE NUEVO</button>
+            <input type="text" id="gameOverPlayerName" placeholder="Tu nombre" maxlength="10" style="margin-top:15px; padding:10px; font-family:'Press Start 2P', 'Courier New', monospace; width:80%; max-width:300px; text-align: center; background:#222; color:#fff; border:2px solid #555;">
+            <button id="gameOverSaveBtn">GUARDAR INTENTO</button>
         </div>
         <div id="winLevelScreen" class="menu-screen">
             <h2 style="color: #3498db;">¡Servicio Instalado!</h2>
@@ -265,7 +277,7 @@
             <h2 style="color: #f1c40f;">¡JUEGO COMPLETADO!</h2>
             <p>Sobreviviste a las carreteras.</p>
             <p id="finalTimeText" style="color: #2ecc71; margin-bottom:15px; font-size:16px;"></p>
-            <input type="text" id="playerName" placeholder="Tu Nombre" maxlength="10" style="padding:10px; font-family:'Press Start 2P'; margin-bottom:15px; width:80%; max-width:300px; text-align: center; background:#222; color:#fff; border:2px solid #f1c40f;">
+            <input type="text" id="playerName" placeholder="Tu Nombre" maxlength="10" style="padding:10px; font-family:'Press Start 2P', 'Courier New', monospace; margin-bottom:15px; width:80%; max-width:300px; text-align: center; background:#222; color:#fff; border:2px solid #f1c40f;">
             <br>
             <button id="saveScoreBtn">GUARDAR PUNTAJE</button>
         </div>
@@ -276,7 +288,7 @@
             <br>
             <button id="timedSaveScoreBtn" style="background:#e74c3c; color:#fff; margin-top:10px; padding: 15px;">SALIR Y GUARDAR</button>
             <br>
-            <input type="text" id="timedPlayerName" placeholder="Tu nombre" maxlength="10" style="margin-top:15px; padding:10px; font-family:'Press Start 2P'; width:80%; max-width:300px; text-align: center; background:#222; color:#fff; border:2px solid #555;">
+            <input type="text" id="timedPlayerName" placeholder="Tu nombre" maxlength="10" style="margin-top:15px; padding:10px; font-family:'Press Start 2P', 'Courier New', monospace; width:80%; max-width:300px; text-align: center; background:#222; color:#fff; border:2px solid #555;">
         </div>
         <div id="pauseScreen" class="menu-screen">
             <h2 style="color: #f1c40f;">PAUSA</h2>

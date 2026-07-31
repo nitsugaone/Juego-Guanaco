@@ -20,6 +20,10 @@ export class Entity {
         this.visH = visH;  // Alto visual (para dibujar el sprite)
         this.w = visW;     // Ancho de colisión (puede modificarse después)
         this.h = visH;     // Alto de colisión (puede modificarse después)
+        // Corrimiento vertical del hitbox respecto del centro del sprite.
+        // Algunos dibujos no están centrados en su PNG: la ambulancia, por
+        // ejemplo, queda 5% más abajo que el centro del lienzo.
+        this.offY = 0;
     }
 
     /**
@@ -30,11 +34,14 @@ export class Entity {
      * @returns {boolean} true si los hitboxes se superponen
      */
     checkCollision(other) {
+        // Centro del hitbox, que puede estar corrido respecto del sprite
+        const ay = this.y + this.offY;
+        const by = other.y + other.offY;
         return (
             this.x - this.w / 2 < other.x + other.w / 2 &&
             this.x + this.w / 2 > other.x - other.w / 2 &&
-            this.y - this.h / 2 < other.y + other.h / 2 &&
-            this.y + this.h / 2 > other.y - other.h / 2
+            ay - this.h / 2 < by + other.h / 2 &&
+            ay + this.h / 2 > by - other.h / 2
         );
     }
 }

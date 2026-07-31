@@ -8,9 +8,10 @@ import {
     GAME_WIDTH, GAME_HEIGHT, WORLD_HEIGHT_SCALE, SCALES, LEVEL_LAYOUTS,
     BASE_PLAYER_SPEED, SPEED_PER_TIER, PLAYER_SIZE_SCALE,
     PLAYER_VIS_WIDTH_FACTOR, PLAYER_VIS_HEIGHT_FACTOR, PLAYER_STEP_INTERVAL,
-    NUM_CAR_SPRITES, CARS_PER_LANE, CAR_HEIGHT_FACTOR, CAR_SIZE_SCALE,
+    NUM_CAR_SPRITES, CARS_PER_LANE, CARS_PER_LANE_MAX, CAR_HEIGHT_FACTOR, CAR_SIZE_SCALE,
     BASE_CAR_SPEED, CAR_SPEED_PER_TIER, CAR_BOUNCE_SPEED,
-    CAR2_SIZE_MULTIPLIER, CAR_SPACING_MULTIPLIER,
+    CAR2_SIZE_MULTIPLIER, CAR_SPACING_MULTIPLIER, CAR_SPACING_PER_TIER,
+    CAR_SPACING_MIN_MULTIPLIER, CAR_HITBOX_SHRINK,
     HOUSE_VIS_SCALE, POLE_WIDTH, POLE_HEIGHT, POLE_VIS_WIDTH_FACTOR,
     POLE_VIS_HEIGHT_FACTOR, POLE_POSITIONS, POLE_RANDOM_OFFSET,
     FREEZE_DURATION, SHAKE_DURATION, SHAKE_MAGNITUDE,
@@ -24,6 +25,7 @@ import {
 } from './config.js';
 
 import { Entity, ParticleSystem, FloatingTextSystem } from './entities.js';
+import { measureContentBox } from './sprites.js';
 
 export class Game {
     /**
@@ -65,6 +67,21 @@ export class Game {
         // Estado de teclas presionadas
         this.keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
         this.setupInputs();
+    }
+
+    /**
+     * Deja todo listo para una partida nueva desde el nivel 1.
+     * Reinicia también el temporizador de los mensajes de la casa: si no, tras
+     * reiniciar seguía contando desde donde había quedado y el mensaje de los
+     * 5 minutos aparecía recién a los 10, 15, etc.
+     */
+    resetRun() {
+        this.level = 1;
+        this.vidas = INITIAL_LIVES;
+        this.timeElapsed = 0;
+        this.nextMessageTime = TIMED_MESSAGE_INTERVAL_MS;
+        this.messageIndex = 0;
+        this.initLevel(this.level);
     }
 
     /**
@@ -111,6 +128,10 @@ export class Game {
         // cacheados del nivel anterior ya no sirven.
         if (this.sprites) this.sprites.clear();
 
+        // Soltar las teclas: si el jugador moría con una flecha apretada, el
+        // guanaco reaparecía caminando solo.
+        for (const k in this.keys) this.keys[k] = false;
+
         // Seleccionar layout del nivel (clampeado al máximo)
         const layoutIdx = Math.min(levelIndex, MAX_LEVELS);
         const layout = LEVEL_LAYOUTS[layoutIdx];
@@ -130,6 +151,14 @@ export class Game {
         // Tier de dificultad: cada LEVELS_PER_TIER niveles, autos más rápidos
         const diffTier = Math.ceil(levelIndex / LEVELS_PER_TIER);
         this.player.speed = BASE_PLAYER_SPEED + (diffTier * SPEED_PER_TIER);
+
+        // El tráfico también se densifica con la dificultad: más autos por
+        // carril y menos hueco entre ellos, con un piso que evita que se toquen.
+        const carsPerLane = Math.min(CARS_PER_LANE + Math.floor(diffTier / 2), CARS_PER_LANE_MAX);
+        const spacingMult = Math.max(
+            CAR_SPACING_MIN_MULTIPLIER,
+            CAR_SPACING_MULTIPLIER - (diffTier - 1) * CAR_SPACING_PER_TIER
+        );
         this.player.dir = 'up';        // Dirección inicial: mirando arriba
         this.player.stepTimer = 0;     // Timer para sonido de pasos
 
@@ -182,16 +211,16 @@ export class Game {
                     // de a uno. Sin esto, un auto colocado más allá del borde derecho se
                     // teletransportaba al borde izquierdo en el primer frame y terminaba
                     // encima de otro.
-                    const maxCarW = carBase * CAR2_SIZE_MULTIPLIER;      // Ancho del auto más grande (camión)
-                    const minSpacing = maxCarW * CAR_SPACING_MULTIPLIER; // Hueco mínimo deseado entre autos
+                    const maxCarW = carBase * CAR2_SIZE_MULTIPLIER;  // Ancho del auto más grande (camión)
+                    const minSpacing = maxCarW * spacingMult;        // Hueco mínimo deseado entre autos
                     // La pista debe cubrir al menos la pantalla completa + un auto,
                     // y ser lo bastante larga para que TODOS los autos tengan su hueco.
-                    const trackLen = Math.max(GAME_WIDTH + maxCarW, CARS_PER_LANE * minSpacing);
+                    const trackLen = Math.max(GAME_WIDTH + maxCarW, carsPerLane * minSpacing);
                     const trackStart = -maxCarW / 2;         // Borde izquierdo de la pista (fuera de cámara)
-                    const spacing = trackLen / CARS_PER_LANE; // Separación real y uniforme
+                    const spacing = trackLen / carsPerLane;  // Separación real y uniforme
                     const laneOffset = Math.random() * trackLen; // Desfase aleatorio del carril
 
-                    for (let c = 0; c < CARS_PER_LANE; c++) {
+                    for (let c = 0; c < carsPerLane; c++) {
                         // Seleccionar sprite aleatorio (car1..car6)
                         const carImgKey = 'car' + (Math.floor(Math.random() * NUM_CAR_SPRITES) + 1);
 
@@ -219,9 +248,20 @@ export class Game {
                         car.trackStart = trackStart;
                         car.trackLen = trackLen;
 
-                        // Hitbox del auto (más chico que el visual para colisiones justas)
-                        car.w = car.visW * SCALES.CAR_W;
-                        car.h = car.visH * SCALES.CAR_H;
+                        // Hitbox ajustado al vehículo realmente dibujado dentro del
+                        // PNG, no al lienzo entero: el camión ocupa el 18% del alto
+                        // y la ambulancia el 57%, así que un porcentaje fijo golpeaba
+                        // de lejos con uno y no golpeaba con la otra.
+                        const cbox = measureContentBox(img, carImgKey);
+                        if (cbox) {
+                            car.w = car.visW * cbox.w * CAR_HITBOX_SHRINK;
+                            car.h = car.visH * cbox.h * CAR_HITBOX_SHRINK;
+                            car.offY = (cbox.cy - 0.5) * car.visH; // algunos dibujos no están centrados
+                        } else {
+                            // No se pudieron leer los píxeles: hitbox fijo de respaldo
+                            car.w = car.visW * SCALES.CAR_W;
+                            car.h = car.visH * SCALES.CAR_H;
+                        }
                         car.speed = baseSpeed;
                         car.img = carImgKey;
                         this.cars.push(car);
@@ -265,6 +305,9 @@ export class Game {
         if (this.vidas <= 0) {
             // Sin vidas: Game Over
             setTimeout(() => {
+                // Mostrar hasta dónde llegó, para poder guardarlo en la tabla
+                document.getElementById("gameOverStats").innerText =
+                    `Llegaste al nivel ${this.level} en ${this.formatTime(this.timeElapsed)}`;
                 this.setScreen("gameOverScreen");
                 document.getElementById("aiExcuseText").style.display = "none";
                 this.state = "GAMEOVER";

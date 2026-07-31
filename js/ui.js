@@ -6,7 +6,7 @@
 // ==========================================
 
 import {
-    GAME_WIDTH, GAME_HEIGHT, MAX_DT, INITIAL_LIVES,
+    GAME_WIDTH, GAME_HEIGHT, MAX_DT,
     IMAGE_URLS, EXCUSAS_GUANACO, DATO_P1, DATO_P2, DATO_P3,
     MENSAJES_JEFE, SPRITE_TEXT_REGIONS
 } from './config.js';
@@ -56,6 +56,13 @@ function setScreen(screenId) {
 // Leaderboard (tabla de puntajes)
 // ==========================================
 
+/** Escapa texto para que un nombre con < o & no rompa el HTML de la lista */
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+
 /** Lee los puntajes de localStorage y actualiza la lista HTML */
 function updateLeaderboard() {
     const scores = JSON.parse(localStorage.getItem('guanacoScores')) || [];
@@ -63,30 +70,48 @@ function updateLeaderboard() {
     list.innerHTML = '';
     if (scores.length === 0) {
         list.innerHTML = '<li>1. Sin récords aún</li>';
+        return;
     }
     scores.forEach((s, i) => {
-        list.innerHTML += `<li>${i + 1}. ${s.name} - ${s.time}</li>`;
+        // Las entradas viejas no guardaban el nivel alcanzado
+        const lvl = s.level ? `Nv.${s.level}` : 'Nv.?';
+        list.innerHTML += `<li>${i + 1}. ${escapeHtml(s.name)} - ${lvl} - ${s.time}</li>`;
     });
 }
 
 /**
- * Guarda un puntaje en localStorage.
- * Mantiene solo los 5 mejores tiempos.
+ * Guarda un intento en localStorage y deja solo los 5 mejores.
+ *
+ * Se ordena primero por nivel alcanzado y recién después por tiempo. Antes se
+ * ordenaba solo por tiempo, así que quien abandonaba a los 5 minutos en el
+ * nivel 2 quedaba por encima de quien terminaba los 10 niveles en 8 minutos.
+ *
  * @param {string} name - Nombre del jugador
  * @param {number} timeInSeconds - Tiempo total en segundos
+ * @param {number} level - Nivel alcanzado
  */
-function saveScore(name, timeInSeconds) {
+function saveScore(name, timeInSeconds, level) {
     const scores = JSON.parse(localStorage.getItem('guanacoScores')) || [];
     const mins = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
     const secs = Math.floor(timeInSeconds % 60).toString().padStart(2, '0');
     scores.push({
-        name: name || "Anónimo",
+        name: (name || "").trim() || "Anónimo",
+        level: level,
         time: `${mins}:${secs}`,
         rawSeconds: timeInSeconds
     });
-    scores.sort((a, b) => a.rawSeconds - b.rawSeconds); // Ordenar por tiempo (menor = mejor)
-    scores.splice(5);                                    // Mantener solo top 5
+    scores.sort((a, b) => (b.level || 0) - (a.level || 0) || a.rawSeconds - b.rawSeconds);
+    scores.splice(5);  // Mantener solo top 5
     localStorage.setItem('guanacoScores', JSON.stringify(scores));
+}
+
+/** Guarda el intento actual y vuelve al menú principal */
+function saveAndExit(inputId) {
+    saveScore(document.getElementById(inputId).value, game.timeElapsed, game.level);
+    document.getElementById(inputId).value = '';
+    updateLeaderboard();
+    setScreen('startScreen');
+    game.state = "MENU";
 }
 
 // ==========================================
@@ -109,8 +134,10 @@ function loadAssets(onComplete) {
     }
 
     for (const key in IMAGE_URLS) {
+        // Los assets son locales (mismo origen), así que no hace falta
+        // crossOrigin: pedirlo solo agrega una restricción que puede
+        // hacer fallar la carga en algunos servidores.
         const img = new Image();
-        img.crossOrigin = "Anonymous"; // Necesario para createPattern con imágenes externas
 
         img.onload = () => {
             loaded++;
@@ -176,11 +203,7 @@ document.getElementById('generateExcuseBtn').addEventListener('click', () => {
 document.getElementById('startBtn').addEventListener('click', () => {
     audio.resume(); // Desbloquear audio tras interacción del usuario
     document.getElementById('aiFactText').style.display = 'none';
-    if (!game) game = new Game(audio, ASSETS, cespedPattern, setScreen, sprites);
-    game.level = 1;
-    game.vidas = INITIAL_LIVES;
-    game.timeElapsed = 0;
-    game.initLevel(game.level);
+    game.resetRun();
     setScreen(null);         // Ocultar menús → mostrar canvas
     game.state = "PLAYING";
 });
@@ -188,10 +211,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
 // Reiniciar tras game over
 document.getElementById('restartBtn').addEventListener('click', () => {
     document.getElementById('aiExcuseText').style.display = 'none';
-    game.level = 1;
-    game.vidas = INITIAL_LIVES;
-    game.timeElapsed = 0;
-    game.initLevel(game.level);
+    game.resetRun();
     setScreen(null);
     game.state = "PLAYING";
 });
@@ -206,21 +226,15 @@ document.getElementById('nextLevelBtn').addEventListener('click', () => {
 });
 
 // Guardar puntaje (pantalla de victoria final)
-document.getElementById('saveScoreBtn').addEventListener('click', () => {
-    const name = document.getElementById('playerName').value;
-    saveScore(name, game.timeElapsed);
-    updateLeaderboard();
-    setScreen('startScreen');
-    game.state = "MENU";
-});
+document.getElementById('saveScoreBtn').addEventListener('click', () => saveAndExit('playerName'));
 
 // Guardar puntaje (pantalla de mensaje temporizado)
-document.getElementById('timedSaveScoreBtn').addEventListener('click', () => {
-    const name = document.getElementById('timedPlayerName').value;
-    saveScore(name, game.timeElapsed);
-    updateLeaderboard();
-    setScreen('startScreen');
-    game.state = "MENU";
+document.getElementById('timedSaveScoreBtn').addEventListener('click', () => saveAndExit('timedPlayerName'));
+
+// Guardar el intento tras perder: antes morir no dejaba ningún registro
+document.getElementById('gameOverSaveBtn').addEventListener('click', () => {
+    document.getElementById('aiExcuseText').style.display = 'none';
+    saveAndExit('gameOverPlayerName');
 });
 
 // Continuar jugando (desde mensaje temporizado)
@@ -261,9 +275,11 @@ function gameLoop(timestamp) {
     lastTime = timestamp;
     if (dt > MAX_DT) dt = MAX_DT;           // Clampear para evitar saltos grandes (ej: cambio de pestaña)
 
-    // Actualizar y dibujar solo si el juego está activo
+    // Actualizar y dibujar solo si hay una partida en curso. VICTORY entra en
+    // la lista porque si no el canvas quedaba congelado detrás de la pantalla final.
     if (game && (game.state === "PLAYING" || game.state === "PAUSED" ||
-        game.state === "GAMEOVER" || game.state === "WINLEVEL")) {
+        game.state === "GAMEOVER" || game.state === "WINLEVEL" ||
+        game.state === "VICTORY")) {
         game.update(dt);
         game.draw(ctx);
     }

@@ -24,7 +24,8 @@ export const PLAYER_STEP_INTERVAL = 0.2;       // Segundos entre sonidos de paso
 
 // --- Autos / Vehículos ---
 export const NUM_CAR_SPRITES = 6;              // Cantidad de sprites de autos disponibles (car1..car6)
-export const CARS_PER_LANE = 2;                // Cantidad de autos por carril
+export const CARS_PER_LANE = 2;                // Autos por carril en el tier más fácil
+export const CARS_PER_LANE_MAX = 4;            // Tope de autos por carril en los niveles altos
 export const CAR_HEIGHT_FACTOR = 0.85;         // Altura base del auto como fracción del carril
 export const CAR_SIZE_SCALE = 1.17;            // Escala general de autos (1.17 = 25% más grande que 0.9375)
 export const BASE_CAR_SPEED = 80;              // Velocidad base de autos en px/seg
@@ -36,6 +37,10 @@ export const CAR2_SIZE_MULTIPLIER = 1.6;       // Multiplicador extra para car2 
 // Si los autos no entran en el ancho de pantalla con esta separación,
 // la pista virtual se alarga fuera de cámara (ver trackLen en game.js).
 export const CAR_SPACING_MULTIPLIER = 1.5;
+// La separación se va achicando a medida que sube la dificultad...
+export const CAR_SPACING_PER_TIER = 0.08;
+// ...pero nunca por debajo de esto, que garantiza que nunca se superpongan.
+export const CAR_SPACING_MIN_MULTIPLIER = 1.2;
 
 // --- Escalas de colisión (hitbox) ---
 // Cada valor es una fracción del tamaño VISUAL de la entidad.
@@ -46,11 +51,18 @@ export const SCALES = {
     PLAYER_H_V: 0.08,  // Alto hitbox del jugador mirando arriba/abajo
     PLAYER_W_H: 0.1,   // Ancho hitbox del jugador mirando izquierda/derecha
     PLAYER_H_H: 0.05,  // Alto hitbox del jugador mirando izquierda/derecha
-    CAR_W: 0.9,        // Ancho hitbox de autos (90% del visual)
-    CAR_H: 0.4,        // Alto hitbox de autos (40% del visual)
+    CAR_W: 0.9,        // Respaldo: ancho hitbox de autos si no se puede medir el sprite
+    CAR_H: 0.4,        // Respaldo: alto hitbox de autos si no se puede medir el sprite
     CASA_W: 0.7,       // Ancho hitbox de la casa
     CASA_H: 0.35       // Alto hitbox de la casa
 };
+
+// Hitbox de los autos como fracción del vehículo REALMENTE dibujado dentro del
+// PNG (se mide al cargar, ver measureContentBox). Un solo porcentaje fijo sobre
+// el lienzo entero no servía: el camión ocupa el 18% del alto y la ambulancia
+// el 57%, así que el mismo 0.4 golpeaba de lejos con uno y no golpeaba con la otra.
+// 0.85 = el hitbox es el 85% del vehículo, para que las colisiones sean justas.
+export const CAR_HITBOX_SHRINK = 0.85;
 
 // --- Zonas de texto en los sprites ---
 // Cuando un auto va hacia la derecha se espeja el sprite para que apunte al
