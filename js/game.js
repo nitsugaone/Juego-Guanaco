@@ -84,6 +84,21 @@ export class Game {
         this.initLevel(this.level);
     }
 
+    /** Suelta todas las teclas: el guanaco deja de moverse. */
+    releaseKeys() {
+        for (const k in this.keys) this.keys[k] = false;
+    }
+
+    /**
+     * Pausa la partida y muestra la pantalla de pausa.
+     * No hace nada si no se está jugando.
+     */
+    pause() {
+        if (this.state !== "PLAYING") return;
+        this.state = "PAUSED";
+        this.setScreen('pauseScreen');
+    }
+
     /**
      * Configura controles: teclado (flechas) y D-pad táctil (móvil).
      */
@@ -104,10 +119,26 @@ export class Game {
                 e.preventDefault();
                 this.keys[btn.dataset.key] = true;
             }, { passive: false });
-            btn.addEventListener('touchend', e => {
+            const soltar = e => {
                 e.preventDefault();
                 this.keys[btn.dataset.key] = false;
-            }, { passive: false });
+            };
+            btn.addEventListener('touchend', soltar, { passive: false });
+            // touchcancel: el sistema se queda con el toque (una llamada entrante,
+            // el gesto de volver atrás). Sin esto la tecla quedaba apretada.
+            btn.addEventListener('touchcancel', soltar, { passive: false });
+        });
+
+        // Si la ventana pierde el foco, el navegador nunca entrega el 'keyup':
+        // el guanaco seguía caminando solo hacia el tráfico mientras el jugador
+        // miraba otra pestaña. Se sueltan las teclas y se pausa la partida.
+        const suspender = () => {
+            this.releaseKeys();
+            this.pause();
+        };
+        window.addEventListener('blur', suspender);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) suspender();
         });
     }
 

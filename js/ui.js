@@ -50,6 +50,9 @@ let lastTime = 0;   // Timestamp del frame anterior (para calcular dt)
 function setScreen(screenId) {
     document.querySelectorAll('.menu-screen').forEach(el => el.style.display = 'none');
     if (screenId) document.getElementById(screenId).style.display = 'flex';
+    // El D-pad táctil vive debajo del canvas: solo se muestra mientras se juega,
+    // para que no quede visible detrás de los menús.
+    document.body.classList.toggle('jugando', !screenId);
 }
 
 // ==========================================
@@ -246,10 +249,7 @@ document.getElementById('continuePlayingBtn').addEventListener('click', () => {
 
 // Pausar juego
 document.getElementById('pauseBtn').addEventListener('click', () => {
-    if (game && game.state === "PLAYING") {
-        game.state = "PAUSED";
-        setScreen('pauseScreen');
-    }
+    if (game) game.pause();
 });
 
 // Reanudar juego

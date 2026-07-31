@@ -15,6 +15,14 @@
             font-display: swap;   /* muestra texto ya mismo con la fuente de respaldo */
             src: url('./assets/fonts/press-start-2p-latin.woff2') format('woff2');
         }
+        :root {
+            /* Alto que se le reserva al D-pad debajo del canvas.
+               En escritorio no hay controles tactiles, asi que es 0. */
+            --controles-alto: 0px;
+            /* En horizontal el D-pad va al costado y lo que se reserva es ancho */
+            --controles-ancho: 0px;
+            --dpad-celda: 60px;
+        }
         * {
             box-sizing: border-box;
             user-select: none;
@@ -27,8 +35,10 @@
             background-color: #050505;
             color: #ecf0f1;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            gap: 12px;
             height: 100vh;
             width: 100vw;
             font-family: 'Press Start 2P', 'Courier New', monospace;
@@ -36,10 +46,21 @@
         }
         #gameWrapper {
             position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: 100vh;
-            max-height: 800px;
+            /* El canvas dibuja en 600x800, o sea 3:4. Antes el wrapper se estiraba
+               a todo el ancho disponible con alto fijo, asi que en un telefono de
+               390px de ancho la imagen quedaba comprimida un 35% a lo largo.
+               Fijando la proporcion, el juego se ve correcto en cualquier pantalla
+               y sobran bandas negras arriba y abajo. */
+            width: min(
+                calc(100vw - var(--controles-ancho)),
+                600px,
+                calc((100vh - var(--controles-alto)) * 0.75)
+            );
+            aspect-ratio: 3 / 4;
+            /* Permite medir los textos del HUD y los menus en 'cqw' (1% del ancho
+               del wrapper). Con tamaños fijos en px, en un telefono de 390px el
+               titulo se partia en dos lineas y el HUD se montaba sobre el juego. */
+            container-type: inline-size;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -49,7 +70,7 @@
         }
         #uiLayer {
             width: 100%;
-            padding: 15px;
+            padding: clamp(6px, 2.5cqw, 15px);
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -67,11 +88,15 @@
             pointer-events: auto;
         }
         .ui-text {
-            font-size: 14px;
+            /* Medido en cqw (1% del ancho del wrapper) con el tamaño de diseño
+               original como techo: a 600px de ancho da exactamente 14px, igual
+               que antes. En pantallas angostas se achica en proporción en vez
+               de desbordar o superponerse al juego. */
+            font-size: clamp(8px, 2.333cqw, 14px);
             text-shadow: 2px 2px 0 #000;
         }
         h1 {
-            font-size: 18px;
+            font-size: clamp(10px, 3cqw, 18px);
             text-shadow: 3px 3px 0 #000;
             margin-bottom: 5px;
             color: #fff;
@@ -81,9 +106,9 @@
             border: 2px solid #2c3e50;
             border-radius: 5px;
             color: #2c3e50;
-            font-size: 16px;
-            width: 35px;
-            height: 35px;
+            font-size: clamp(10px, 2.667cqw, 16px);
+            width: clamp(24px, 5.833cqw, 35px);
+            height: clamp(24px, 5.833cqw, 35px);
             cursor: pointer;
             font-family: 'Press Start 2P', 'Courier New', monospace;
             padding-top: 3px;
@@ -115,14 +140,14 @@
             padding: 20px;
         }
         .menu-screen h2 {
-            font-size: 18px;
+            font-size: clamp(11px, 3cqw, 18px);
             line-height: 1.5;
             margin-bottom: 20px;
             text-shadow: 2px 2px #000;
             max-width: 90%;
         }
         .menu-screen p {
-            font-size: 12px;
+            font-size: clamp(8px, 2cqw, 12px);
             margin-bottom: 20px;
             line-height: 1.5;
             text-shadow: 1px 1px #000;
@@ -132,9 +157,9 @@
             background-color: #ecf0f1;
             color: #2c3e50;
             border: 4px solid #bdc3c7;
-            padding: 15px 20px;
+            padding: clamp(8px, 2.5cqw, 15px) clamp(10px, 3.333cqw, 20px);
             font-family: 'Press Start 2P', 'Courier New', monospace;
-            font-size: 12px;
+            font-size: clamp(8px, 2cqw, 12px);
             cursor: pointer;
             margin-top: 10px;
             transition: transform 0.1s, box-shadow 0.1s;
@@ -152,7 +177,7 @@
             box-shadow: 0 0 0 transparent !important;
         }
         .stars-container {
-            font-size: 30px;
+            font-size: clamp(16px, 5cqw, 30px);
             color: #555;
             margin: 15px 0;
             text-shadow: 2px 2px #000;
@@ -169,30 +194,29 @@
             max-width: 400px;
         }
         #leaderboard h3 {
-            font-size: 14px;
+            font-size: clamp(9px, 2.333cqw, 14px);
             margin-bottom: 15px;
             border-bottom: 2px solid #fff;
             padding-bottom: 5px;
         }
         #leaderboard ol {
-            font-size: 12px;
+            font-size: clamp(8px, 2cqw, 12px);
             line-height: 2;
             padding-left: 20px;
         }
+        /* El D-pad va DEBAJO del canvas, no encima.
+           Antes estaba superpuesto abajo al centro, justo donde arranca el
+           guanaco: los botones le tapaban el personaje al empezar cada nivel. */
         #touchControls {
             display: none;
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
             z-index: 20;
         }
         .dpad {
             display: grid;
-            grid-template-columns: 60px 60px 60px;
-            grid-template-rows: 60px 60px 60px;
+            grid-template-columns: repeat(3, var(--dpad-celda));
+            grid-template-rows: repeat(3, var(--dpad-celda));
             gap: 8px;
-            opacity: 0.6;
+            opacity: 0.75;
         }
         .dpad-btn {
             background-color: rgba(255,255,255,0.9);
@@ -215,7 +239,25 @@
         #rightBtn { grid-column: 3; grid-row: 2; }
         #downBtn { grid-column: 2; grid-row: 3; }
         @media (hover: none) and (pointer: coarse) {
-            #touchControls { display: block; }
+            :root {
+                /* 3 celdas + 2 huecos + el gap del body */
+                --controles-alto: calc(var(--dpad-celda) * 3 + 16px + 12px);
+            }
+            /* Solo se muestra con la partida a la vista: en los menus estorba */
+            body.jugando #touchControls { display: block; }
+        }
+        /* Pantallas muy bajas (telefono acostado): D-pad mas chico */
+        @media (hover: none) and (pointer: coarse) and (max-height: 560px) {
+            :root { --dpad-celda: 46px; }
+        }
+        /* Telefono acostado: con el D-pad abajo el canvas quedaba minusculo,
+           porque el alto es justo lo que mas escasea. Va al costado. */
+        @media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+            :root {
+                --controles-alto: 0px;
+                --controles-ancho: calc(var(--dpad-celda) * 3 + 16px + 12px);
+            }
+            body { flex-direction: row; }
         }
     </style>
 </head>
@@ -233,14 +275,6 @@
             </div>
         </div>
         <canvas id="gameCanvas"></canvas>
-        <div id="touchControls">
-            <div class="dpad">
-                <div id="upBtn" class="dpad-btn" data-key="ArrowUp">▲</div>
-                <div id="leftBtn" class="dpad-btn" data-key="ArrowLeft">◄</div>
-                <div id="rightBtn" class="dpad-btn" data-key="ArrowRight">►</div>
-                <div id="downBtn" class="dpad-btn" data-key="ArrowDown">▼</div>
-            </div>
-        </div>
         <div id="loadingScreen" class="menu-screen" style="display: flex;">
             <h2 id="loadingText">Cargando... 0%</h2>
             <p>Conectando fibra óptica...</p>
@@ -293,6 +327,14 @@
         <div id="pauseScreen" class="menu-screen">
             <h2 style="color: #f1c40f;">PAUSA</h2>
             <button id="resumeBtn">REANUDAR</button>
+        </div>
+    </div>
+    <div id="touchControls">
+        <div class="dpad">
+            <div id="upBtn" class="dpad-btn" data-key="ArrowUp">▲</div>
+            <div id="leftBtn" class="dpad-btn" data-key="ArrowLeft">◄</div>
+            <div id="rightBtn" class="dpad-btn" data-key="ArrowRight">►</div>
+            <div id="downBtn" class="dpad-btn" data-key="ArrowDown">▼</div>
         </div>
     </div>
     <script type="module" src="./js/ui.js"></script>
