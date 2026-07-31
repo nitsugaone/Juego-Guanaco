@@ -224,7 +224,6 @@ export class Game {
                         car.h = car.visH * SCALES.CAR_H;
                         car.speed = baseSpeed;
                         car.img = carImgKey;
-                        car.hue = Math.random() * 360; // Variación de color por hue-rotate
                         this.cars.push(car);
                     }
                 }
@@ -423,17 +422,16 @@ export class Game {
      * @param {number} y - Posición Y centro (coordenadas mundo)
      * @param {number} w - Ancho de dibujo
      * @param {number} h - Alto de dibujo
-     * @param {number} hue - Rotación de tono en grados (0 = sin cambio)
      * @param {number} wobble - Ángulo de rotación/balanceo en radianes
      * @param {number} flipX - 1 = normal, -1 = espejado horizontal
      */
-    drawImgCenter(ctx, imgKey, x, y, w, h, hue = 0, wobble = 0, flipX = 1) {
+    drawImgCenter(ctx, imgKey, x, y, w, h, wobble = 0, flipX = 1) {
         const img = this.ASSETS[imgKey];
         if (!img) return;
 
-        // Sprite ya escalado y coloreado (se genera una sola vez, ver sprites.js).
+        // Sprite ya escalado (se genera una sola vez, ver sprites.js).
         // Si todavía no cargó la imagen, se dibuja el original como respaldo.
-        const sprite = this.sprites ? this.sprites.get(img, imgKey, w, h, hue) : null;
+        const sprite = this.sprites ? this.sprites.get(img, imgKey, w, h) : null;
 
         ctx.save();
         ctx.translate(x, y);
@@ -562,13 +560,13 @@ export class Game {
             const bounce = Math.abs(Math.sin(this.timeElapsed * CAR_BOUNCE_SPEED + c.x)) * 3;
             // Voltear sprite horizontal si va hacia la izquierda
             const flipX = c.speed < 0 ? -1 : 1;
-            this.drawImgCenter(ctx, c.img, c.x, c.y - bounce, c.visW, c.visH, c.hue, 0, flipX);
+            this.drawImgCenter(ctx, c.img, c.x, c.y - bounce, c.visW, c.visH, 0, flipX);
         }
 
         // --- Dibujar jugador (guanaco) ---
         const isMoving = (this.keys.ArrowUp || this.keys.ArrowDown || this.keys.ArrowLeft || this.keys.ArrowRight);
         const wobble = isMoving ? Math.sin(this.timeElapsed * 20) * 0.15 : 0; // Balanceo al caminar
-        this.drawImgCenter(ctx, this.player.dir, this.player.x, this.player.y, this.player.visW, this.player.visH, 0, wobble);
+        this.drawImgCenter(ctx, this.player.dir, this.player.x, this.player.y, this.player.visW, this.player.visH, wobble);
 
         // --- Dibujar efectos ---
         this.particles.draw(ctx);
